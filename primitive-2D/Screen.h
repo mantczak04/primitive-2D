@@ -28,7 +28,8 @@
 
 class Screen //Screen is locked on 60 FPS value!
 {
-    CHAR_INFO* screen; //front buffer for a double buffering method
+    Pixel* screenBuffer;
+    Pixel* dirtyBuffer;
 
     HANDLE hConsole;
     DWORD bytesWritten;
@@ -36,20 +37,24 @@ class Screen //Screen is locked on 60 FPS value!
     const int height;
     std::chrono::milliseconds frameDurationMs;
 
+
+
 public:
     Screen(int nWidth, int nHeight);
 
     ~Screen();
 
-    void displayScreen();
+    void displayScreen(bool clear);
 
     void setScreenActive();
 
-    int setPixel(int x, int y, WORD color, char character); // TODO set pixel with browsed character and color
+    int setPixel(int x, int y, const Pixel& pixel); // TODO set pixel with browsed character and color
+
+    void markAsDirty(int x, int y);
 
     int setPixel(int x, int y, WORD color); // set pixel to a space with browsed color
 
-    void drawCircle(int centerX, int centerY, int radius, WORD color);
+    void drawCircle(int centerX, int centerY, int radius, const Pixel& pixel);
 
     //getters, setters
 

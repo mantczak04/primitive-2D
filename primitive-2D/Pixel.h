@@ -5,9 +5,10 @@
 #include <Windows.h>
 
 struct Pixel {
-    int x;
-    int y;
-    WORD color;
+    //int x;          //x position
+    //int y;          //y position
+    WORD color;     //color
+    char hue;       //DARK or NORMAL
 };
 
 #endif // MYSTRUCT_H
