@@ -3,8 +3,7 @@
 Screen::Screen(int nWidth, int nHeight)
     : width(nWidth), height(nHeight), bytesWritten(0), frameDurationMs(1000 / 60) // FPS = 60
 {
-    screenBuffer = new Pixel[width * height];
-    dirtyBuffer = new Pixel[width * height];
+    backBuffer = new Pixel[width * height];
 
     hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
     SetConsoleActiveScreenBuffer(hConsole);
@@ -12,17 +11,21 @@ Screen::Screen(int nWidth, int nHeight)
     Pixel blankPixel;
     blankPixel.color = BLACK;
     blankPixel.hue = NORMAL;
-    std::fill_n(screenBuffer, width * height, blankPixel);
+    std::fill_n(backBuffer, width * height, blankPixel);
 }
 
 Screen::~Screen()
 {
-    delete[] screenBuffer;
-    delete[] dirtyBuffer;
+    delete[] backBuffer;
     CloseHandle(hConsole);
 }
 
-void Screen::displayScreen(bool clear)
+void Screen::clearBackBuffer()
+{
+    std::fill_n(backBuffer, width * height, Pixel{ BLACK, NORMAL });
+}
+
+void Screen::displayScreen()
 {
     static auto lastFrameTime = std::chrono::high_resolution_clock::now(); // get last frame time
 
@@ -30,15 +33,15 @@ void Screen::displayScreen(bool clear)
     COORD bufferSize = { static_cast<SHORT>(width), static_cast<SHORT>(height) };
 
 
-    CHAR_INFO* charInfoBuffer = new CHAR_INFO[width * height];
+    CHAR_INFO* frontBuffer = new CHAR_INFO[width * height];
 
     for (int i = 0; i < width * height; ++i) {
-        charInfoBuffer[i].Char.AsciiChar = screenBuffer[i].hue;
-        charInfoBuffer[i].Attributes = screenBuffer[i].color;
+        frontBuffer[i].Char.AsciiChar = backBuffer[i].hue;
+        frontBuffer[i].Attributes = backBuffer[i].color;
     }
 
-    WriteConsoleOutputA(hConsole, charInfoBuffer, bufferSize, {0,0}, &writeRegion);
-    if(clear) std::fill_n(screenBuffer, width * height, Pixel{ BLACK, NORMAL });
+    WriteConsoleOutputA(hConsole, frontBuffer, bufferSize, {0,0}, &writeRegion);
+    
     
 
     // calculate frame time
@@ -53,6 +56,7 @@ void Screen::displayScreen(bool clear)
     {
         std::this_thread::sleep_for(sleepDuration);
     }
+    
 }
 
 void Screen::setScreenActive()
@@ -62,23 +66,14 @@ void Screen::setScreenActive()
 
 int Screen::setPixel(int x, int y, const Pixel& pixel)
 {
-    if (x >= 0 && x < width && y >= 0 && y < height)
+    if (x >= 0 && x < width && y >= 0 && y < height) 
     {
         int index = y * width + x;
-        screenBuffer[index] = pixel;
-        markAsDirty(x, y);
+        backBuffer[index] = pixel;
 
     }
     else return 100;
 }
-
-void Screen::markAsDirty(int x, int y) {
-    if (x >= 0 && x < width && y >= 0 && y < height) {
-        int index = y * width + x;
-        dirtyBuffer[index] = screenBuffer[index];
-    }
-}
-
 
 void Screen::drawCircle(int centerX, int centerY, int radius, const Pixel& pixel) {
     int x = radius;

@@ -28,8 +28,7 @@
 
 class Screen //Screen is locked on 60 FPS value!
 {
-    Pixel* screenBuffer;
-    Pixel* dirtyBuffer;
+    Pixel* backBuffer;
 
     HANDLE hConsole;
     DWORD bytesWritten;
@@ -44,13 +43,13 @@ public:
 
     ~Screen();
 
-    void displayScreen(bool clear);
+    void displayScreen();
+
+    void clearBackBuffer();
 
     void setScreenActive();
 
     int setPixel(int x, int y, const Pixel& pixel); // TODO set pixel with browsed character and color
-
-    void markAsDirty(int x, int y);
 
     int setPixel(int x, int y, WORD color); // set pixel to a space with browsed color
 
