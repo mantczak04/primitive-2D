@@ -100,6 +100,14 @@ void Screen::drawCircle(int centerX, int centerY, int radius, const Pixel& pixel
     }
 }
 
+void Screen::drawRectangle(int x, int y, int width, int height, const Pixel& pixel) {
+    for (int i = x; i < x+width; i++) {
+        for (int j = y; j < y + width; j++) {
+            setPixel(i, j, pixel);
+        }
+    }
+}
+
 
 int Screen::getScreenWidth()
 {

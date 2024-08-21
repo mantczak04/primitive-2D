@@ -55,6 +55,8 @@ public:
 
     void drawCircle(int centerX, int centerY, int radius, const Pixel& pixel);
 
+    void drawRectangle(int x, int y, int width, int height, const Pixel& pixel);
+
     //getters, setters
 
     int getScreenWidth();
